@@ -16,6 +16,7 @@ namespace pocketmine\network\mcpe\protocol;
 
 use pocketmine\network\mcpe\protocol\serializer\PacketSerializer;
 use pocketmine\network\mcpe\protocol\types\entity\UpdateAttribute;
+use pocketmine\network\mcpe\protocol\types\PlayerInputTick;
 use function count;
 
 class UpdateAttributesPacket extends DataPacket implements ClientboundPacket{
@@ -24,13 +25,13 @@ class UpdateAttributesPacket extends DataPacket implements ClientboundPacket{
 	public int $actorRuntimeId;
 	/** @var UpdateAttribute[] */
 	public array $entries = [];
-	public int $tick = 0;
+	public PlayerInputTick $tick;
 
 	/**
 	 * @generate-create-func
 	 * @param UpdateAttribute[] $entries
 	 */
-	public static function create(int $actorRuntimeId, array $entries, int $tick) : self{
+	public static function create(int $actorRuntimeId, array $entries, PlayerInputTick $tick) : self{
 		$result = new self;
 		$result->actorRuntimeId = $actorRuntimeId;
 		$result->entries = $entries;
@@ -43,7 +44,7 @@ class UpdateAttributesPacket extends DataPacket implements ClientboundPacket{
 		for($i = 0, $len = $in->getUnsignedVarInt(); $i < $len; ++$i){
 			$this->entries[] = UpdateAttribute::read($in);
 		}
-		$this->tick = $in->getUnsignedVarLong();
+		$this->tick = PlayerInputTick::read($in);
 	}
 
 	protected function encodePayload(PacketSerializer $out) : void{
@@ -52,7 +53,7 @@ class UpdateAttributesPacket extends DataPacket implements ClientboundPacket{
 		foreach($this->entries as $entry){
 			$entry->write($out);
 		}
-		$out->putUnsignedVarLong($this->tick);
+		$this->tick->write($out);
 	}
 
 	public function handle(PacketHandlerInterface $handler) : bool{

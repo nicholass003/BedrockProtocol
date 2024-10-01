@@ -17,6 +17,7 @@ namespace pocketmine\network\mcpe\protocol;
 use pocketmine\math\Vector2;
 use pocketmine\math\Vector3;
 use pocketmine\network\mcpe\protocol\serializer\PacketSerializer;
+use pocketmine\network\mcpe\protocol\types\PlayerInputTick;
 
 class CorrectPlayerMovePredictionPacket extends DataPacket implements ClientboundPacket{
 	public const NETWORK_ID = ProtocolInfo::CORRECT_PLAYER_MOVE_PREDICTION_PACKET;
@@ -27,7 +28,7 @@ class CorrectPlayerMovePredictionPacket extends DataPacket implements Clientboun
 	private Vector3 $position;
 	private Vector3 $delta;
 	private bool $onGround;
-	private int $tick;
+	private PlayerInputTick $tick;
 	private int $predictionType;
 	private ?Vector2 $vehicleRotation;
 	private ?float $vehicleAngularVelocity;
@@ -39,7 +40,7 @@ class CorrectPlayerMovePredictionPacket extends DataPacket implements Clientboun
 		Vector3 $position,
 		Vector3 $delta,
 		bool $onGround,
-		int $tick,
+		PlayerInputTick $tick,
 		int $predictionType,
 		?Vector2 $vehicleRotation,
 		?float $vehicleAngularVelocity,
@@ -55,7 +56,7 @@ class CorrectPlayerMovePredictionPacket extends DataPacket implements Clientboun
 		return $result;
 	}
 
-	public static function create(Vector3 $position, Vector3 $delta, bool $onGround, int $tick, int $predictionType, ?Vector2 $vehicleRotation, ?float $vehicleAngularVelocity) : self{
+	public static function create(Vector3 $position, Vector3 $delta, bool $onGround, PlayerInputTick $tick, int $predictionType, ?Vector2 $vehicleRotation, ?float $vehicleAngularVelocity) : self{
 		if($predictionType === self::PREDICTION_TYPE_VEHICLE && $vehicleRotation === null){
 			throw new \LogicException("CorrectPlayerMovePredictionPackets with type VEHICLE require a vehicleRotation to be provided");
 		}
@@ -69,7 +70,7 @@ class CorrectPlayerMovePredictionPacket extends DataPacket implements Clientboun
 
 	public function isOnGround() : bool{ return $this->onGround; }
 
-	public function getTick() : int{ return $this->tick; }
+	public function getTick() : PlayerInputTick{ return $this->tick; }
 
 	public function getPredictionType() : int{ return $this->predictionType; }
 
@@ -86,7 +87,7 @@ class CorrectPlayerMovePredictionPacket extends DataPacket implements Clientboun
 			$this->vehicleAngularVelocity = $in->readOptional($in->getFloat(...));
 		}
 		$this->onGround = $in->getBool();
-		$this->tick = $in->getUnsignedVarLong();
+		$this->tick = PlayerInputTick::read($in);
 	}
 
 	protected function encodePayload(PacketSerializer $out) : void{
@@ -103,7 +104,7 @@ class CorrectPlayerMovePredictionPacket extends DataPacket implements Clientboun
 			$out->writeOptional($this->vehicleAngularVelocity, $out->putFloat(...));
 		}
 		$out->putBool($this->onGround);
-		$out->putUnsignedVarLong($this->tick);
+		$this->tick->write($out);
 	}
 
 	public function handle(PacketHandlerInterface $handler) : bool{

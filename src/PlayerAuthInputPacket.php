@@ -14,6 +14,7 @@ declare(strict_types=1);
 
 namespace pocketmine\network\mcpe\protocol;
 
+use pocketmine\math\Vector2;
 use pocketmine\math\Vector3;
 use pocketmine\network\mcpe\protocol\serializer\PacketSerializer;
 use pocketmine\network\mcpe\protocol\types\InputMode;
@@ -25,6 +26,7 @@ use pocketmine\network\mcpe\protocol\types\PlayerAuthInputFlags;
 use pocketmine\network\mcpe\protocol\types\PlayerBlockAction;
 use pocketmine\network\mcpe\protocol\types\PlayerBlockActionStopBreak;
 use pocketmine\network\mcpe\protocol\types\PlayerBlockActionWithBlockInfo;
+use pocketmine\network\mcpe\protocol\types\PlayerInputTick;
 use pocketmine\network\mcpe\protocol\types\PlayMode;
 use function assert;
 use function count;
@@ -43,7 +45,7 @@ class PlayerAuthInputPacket extends DataPacket implements ServerboundPacket{
 	private int $playMode;
 	private int $interactionMode;
 	private ?Vector3 $vrGazeDirection = null;
-	private int $tick;
+	private PlayerInputTick $tick;
 	private Vector3 $delta;
 	private ?ItemInteractionData $itemInteractionData = null;
 	private ?ItemStackRequest $itemStackRequest = null;
@@ -52,6 +54,7 @@ class PlayerAuthInputPacket extends DataPacket implements ServerboundPacket{
 	private ?PlayerAuthInputVehicleInfo $vehicleInfo = null;
 	private float $analogMoveVecX;
 	private float $analogMoveVecZ;
+	private Vector2 $interactRotation;
 
 	/**
 	 * @generate-create-func
@@ -69,7 +72,7 @@ class PlayerAuthInputPacket extends DataPacket implements ServerboundPacket{
 		int $playMode,
 		int $interactionMode,
 		?Vector3 $vrGazeDirection,
-		int $tick,
+		PlayerInputTick $tick,
 		Vector3 $delta,
 		?ItemInteractionData $itemInteractionData,
 		?ItemStackRequest $itemStackRequest,
@@ -77,6 +80,7 @@ class PlayerAuthInputPacket extends DataPacket implements ServerboundPacket{
 		?PlayerAuthInputVehicleInfo $vehicleInfo,
 		float $analogMoveVecX,
 		float $analogMoveVecZ,
+		Vector2 $interactRotation
 	) : self{
 		$result = new self;
 		$result->position = $position;
@@ -98,6 +102,7 @@ class PlayerAuthInputPacket extends DataPacket implements ServerboundPacket{
 		$result->vehicleInfo = $vehicleInfo;
 		$result->analogMoveVecX = $analogMoveVecX;
 		$result->analogMoveVecZ = $analogMoveVecZ;
+		$result->interactRotation = $interactRotation;
 		return $result;
 	}
 
@@ -121,14 +126,15 @@ class PlayerAuthInputPacket extends DataPacket implements ServerboundPacket{
 		int $playMode,
 		int $interactionMode,
 		?Vector3 $vrGazeDirection,
-		int $tick,
+		PlayerInputTick $tick,
 		Vector3 $delta,
 		?ItemInteractionData $itemInteractionData,
 		?ItemStackRequest $itemStackRequest,
 		?array $blockActions,
 		?PlayerAuthInputVehicleInfo $vehicleInfo,
 		float $analogMoveVecX,
-		float $analogMoveVecZ
+		float $analogMoveVecZ,
+		Vector2 $interactRotation
 	) : self{
 		if($playMode === PlayMode::VR and $vrGazeDirection === null){
 			//yuck, can we get a properly written packet just once? ...
@@ -168,7 +174,8 @@ class PlayerAuthInputPacket extends DataPacket implements ServerboundPacket{
 			$blockActions,
 			$vehicleInfo,
 			$analogMoveVecX,
-			$analogMoveVecZ
+			$analogMoveVecZ,
+			$interactRotation
 		);
 	}
 
@@ -228,7 +235,7 @@ class PlayerAuthInputPacket extends DataPacket implements ServerboundPacket{
 		return $this->vrGazeDirection;
 	}
 
-	public function getTick() : int{
+	public function getTick() : PlayerInputTick{
 		return $this->tick;
 	}
 
@@ -257,6 +264,10 @@ class PlayerAuthInputPacket extends DataPacket implements ServerboundPacket{
 
 	public function getAnalogMoveVecZ() : float{ return $this->analogMoveVecZ; }
 
+	public function getInteractRotation() : Vector2{
+		return $this->interactRotation;
+	}
+
 	public function hasFlag(int $flag) : bool{
 		return ($this->inputFlags & (1 << $flag)) !== 0;
 	}
@@ -275,7 +286,7 @@ class PlayerAuthInputPacket extends DataPacket implements ServerboundPacket{
 		if($this->playMode === PlayMode::VR){
 			$this->vrGazeDirection = $in->getVector3();
 		}
-		$this->tick = $in->getUnsignedVarLong();
+		$this->tick = PlayerInputTick::read($in);
 		$this->delta = $in->getVector3();
 		if($this->hasFlag(PlayerAuthInputFlags::PERFORM_ITEM_INTERACTION)){
 			$this->itemInteractionData = ItemInteractionData::read($in);
@@ -300,6 +311,7 @@ class PlayerAuthInputPacket extends DataPacket implements ServerboundPacket{
 		}
 		$this->analogMoveVecX = $in->getLFloat();
 		$this->analogMoveVecZ = $in->getLFloat();
+		$this->interactRotation = $in->getVector2();
 	}
 
 	protected function encodePayload(PacketSerializer $out) : void{
@@ -313,11 +325,8 @@ class PlayerAuthInputPacket extends DataPacket implements ServerboundPacket{
 		$out->putUnsignedVarInt($this->inputMode);
 		$out->putUnsignedVarInt($this->playMode);
 		$out->putUnsignedVarInt($this->interactionMode);
-		if($this->playMode === PlayMode::VR){
-			assert($this->vrGazeDirection !== null);
-			$out->putVector3($this->vrGazeDirection);
-		}
-		$out->putUnsignedVarLong($this->tick);
+		$out->putVector3($this->vrGazeDirection);
+		$this->tick->write($out);
 		$out->putVector3($this->delta);
 		if($this->itemInteractionData !== null){
 			$this->itemInteractionData->write($out);
@@ -337,6 +346,7 @@ class PlayerAuthInputPacket extends DataPacket implements ServerboundPacket{
 		}
 		$out->putLFloat($this->analogMoveVecX);
 		$out->putLFloat($this->analogMoveVecZ);
+		$out->putVector2($this->interactRotation);
 	}
 
 	public function handle(PacketHandlerInterface $handler) : bool{

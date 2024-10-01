@@ -12,14 +12,12 @@
 
 declare(strict_types=1);
 
-namespace pocketmine\network\mcpe\protocol\types\camera;
+namespace pocketmine\network\mcpe\protocol\types;
 
-use pocketmine\network\mcpe\protocol\types\PacketIntEnumTrait;
-
-enum CameraAimAssistTargetMode : int{
+enum MovementEffectType : int{
 	use PacketIntEnumTrait;
 
-	case ANGLE = 0;
-	case DISTANCE = 1;
-	case COUNT = 2;
+	case INVALID = -1;
+	case GLIDE_BOOST = 0;
+	case COUNT = 1;
 }

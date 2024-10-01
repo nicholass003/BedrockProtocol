@@ -16,18 +16,19 @@ namespace pocketmine\network\mcpe\protocol;
 
 use pocketmine\math\Vector3;
 use pocketmine\network\mcpe\protocol\serializer\PacketSerializer;
+use pocketmine\network\mcpe\protocol\types\PlayerInputTick;
 
 class SetActorMotionPacket extends DataPacket implements ClientboundPacket, ServerboundPacket{
 	public const NETWORK_ID = ProtocolInfo::SET_ACTOR_MOTION_PACKET;
 
 	public int $actorRuntimeId;
 	public Vector3 $motion;
-	public int $tick;
+	public PlayerInputTick $tick;
 
 	/**
 	 * @generate-create-func
 	 */
-	public static function create(int $actorRuntimeId, Vector3 $motion, int $tick) : self{
+	public static function create(int $actorRuntimeId, Vector3 $motion, PlayerInputTick $tick) : self{
 		$result = new self;
 		$result->actorRuntimeId = $actorRuntimeId;
 		$result->motion = $motion;
@@ -38,13 +39,13 @@ class SetActorMotionPacket extends DataPacket implements ClientboundPacket, Serv
 	protected function decodePayload(PacketSerializer $in) : void{
 		$this->actorRuntimeId = $in->getActorRuntimeId();
 		$this->motion = $in->getVector3();
-		$this->tick = $in->getUnsignedVarLong();
+		$this->tick = PlayerInputTick::read($in);
 	}
 
 	protected function encodePayload(PacketSerializer $out) : void{
 		$out->putActorRuntimeId($this->actorRuntimeId);
 		$out->putVector3($this->motion);
-		$out->putUnsignedVarLong($this->tick);
+		$this->tick->write($out);
 	}
 
 	public function handle(PacketHandlerInterface $handler) : bool{

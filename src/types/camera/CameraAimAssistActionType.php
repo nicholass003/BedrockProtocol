@@ -21,4 +21,5 @@ enum CameraAimAssistActionType : int{
 
 	case SET = 0;
 	case CLEAR = 1;
+	case COUNT = 2;
 }

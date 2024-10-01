@@ -12,14 +12,12 @@
 
 declare(strict_types=1);
 
-namespace pocketmine\network\mcpe\protocol\types\camera;
+namespace pocketmine\network\mcpe\protocol\types;
 
-use pocketmine\network\mcpe\protocol\types\PacketIntEnumTrait;
-
-enum CameraAimAssistTargetMode : int{
+enum ServerAuthMovementMode : int{
 	use PacketIntEnumTrait;
 
-	case ANGLE = 0;
-	case DISTANCE = 1;
-	case COUNT = 2;
+	case LEGACY_CLIENT_AUTHORITATIVE_V1 = 0;
+	case CLIENT_AUTHORITATIVE_V2 = 1;
+	case SERVER_AUTHORITATIVE_V3 = 2;
 }

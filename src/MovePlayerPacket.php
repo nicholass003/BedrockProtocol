@@ -16,6 +16,7 @@ namespace pocketmine\network\mcpe\protocol;
 
 use pocketmine\math\Vector3;
 use pocketmine\network\mcpe\protocol\serializer\PacketSerializer;
+use pocketmine\network\mcpe\protocol\types\PlayerInputTick;
 
 class MovePlayerPacket extends DataPacket implements ClientboundPacket, ServerboundPacket{
 	public const NETWORK_ID = ProtocolInfo::MOVE_PLAYER_PACKET;
@@ -35,7 +36,7 @@ class MovePlayerPacket extends DataPacket implements ClientboundPacket, Serverbo
 	public int $ridingActorRuntimeId = 0;
 	public int $teleportCause = 0;
 	public int $teleportItem = 0;
-	public int $tick = 0;
+	public PlayerInputTick $tick;
 
 	/**
 	 * @generate-create-func
@@ -51,7 +52,7 @@ class MovePlayerPacket extends DataPacket implements ClientboundPacket, Serverbo
 		int $ridingActorRuntimeId,
 		int $teleportCause,
 		int $teleportItem,
-		int $tick,
+		PlayerInputTick $tick,
 	) : self{
 		$result = new self;
 		$result->actorRuntimeId = $actorRuntimeId;
@@ -77,7 +78,7 @@ class MovePlayerPacket extends DataPacket implements ClientboundPacket, Serverbo
 		int $mode,
 		bool $onGround,
 		int $ridingActorRuntimeId,
-		int $tick,
+		PlayerInputTick $tick,
 	) : self{
 		return self::create($actorRuntimeId, $position, $pitch, $yaw, $headYaw, $mode, $onGround, $ridingActorRuntimeId, 0, 0, $tick);
 	}
@@ -95,7 +96,7 @@ class MovePlayerPacket extends DataPacket implements ClientboundPacket, Serverbo
 			$this->teleportCause = $in->getLInt();
 			$this->teleportItem = $in->getLInt();
 		}
-		$this->tick = $in->getUnsignedVarLong();
+		$this->tick = PlayerInputTick::read($in);
 	}
 
 	protected function encodePayload(PacketSerializer $out) : void{
@@ -111,7 +112,7 @@ class MovePlayerPacket extends DataPacket implements ClientboundPacket, Serverbo
 			$out->putLInt($this->teleportCause);
 			$out->putLInt($this->teleportItem);
 		}
-		$out->putUnsignedVarLong($this->tick);
+		$this->tick->write($out);
 	}
 
 	public function handle(PacketHandlerInterface $handler) : bool{

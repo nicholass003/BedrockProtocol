@@ -36,7 +36,7 @@ class CraftingDataPacket extends DataPacket implements ClientboundPacket{
 	public const ENTRY_FURNACE = 2;
 	public const ENTRY_FURNACE_DATA = 3;
 	public const ENTRY_MULTI = 4;
-	public const ENTRY_SHULKER_BOX = 5;
+	public const ENTRY_SHULKER_BOX = 5; //changed to UserDataShapelessRecipe why mojang??
 	public const ENTRY_SHAPELESS_CHEMISTRY = 6;
 	public const ENTRY_SHAPED_CHEMISTRY = 7;
 	public const ENTRY_SMITHING_TRANSFORM = 8;
