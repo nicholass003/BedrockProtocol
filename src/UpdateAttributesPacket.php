@@ -25,13 +25,13 @@ class UpdateAttributesPacket extends DataPacket implements ClientboundPacket{
 	public int $actorRuntimeId;
 	/** @var UpdateAttribute[] */
 	public array $entries = [];
-	public PlayerInputTick $tick;
+	public int $tick = 0;
 
 	/**
 	 * @generate-create-func
 	 * @param UpdateAttribute[] $entries
 	 */
-	public static function create(int $actorRuntimeId, array $entries, PlayerInputTick $tick) : self{
+	public static function create(int $actorRuntimeId, array $entries, int $tick) : self{
 		$result = new self;
 		$result->actorRuntimeId = $actorRuntimeId;
 		$result->entries = $entries;
@@ -44,7 +44,7 @@ class UpdateAttributesPacket extends DataPacket implements ClientboundPacket{
 		for($i = 0, $len = $in->getUnsignedVarInt(); $i < $len; ++$i){
 			$this->entries[] = UpdateAttribute::read($in);
 		}
-		$this->tick = PlayerInputTick::read($in);
+		$this->tick = $in->readPlayerInputTick();
 	}
 
 	protected function encodePayload(PacketSerializer $out) : void{
@@ -53,7 +53,7 @@ class UpdateAttributesPacket extends DataPacket implements ClientboundPacket{
 		foreach($this->entries as $entry){
 			$entry->write($out);
 		}
-		$this->tick->write($out);
+		$out->writePlayerInputTick($this->tick);
 	}
 
 	public function handle(PacketHandlerInterface $handler) : bool{

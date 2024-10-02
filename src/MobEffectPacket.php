@@ -15,7 +15,6 @@ declare(strict_types=1);
 namespace pocketmine\network\mcpe\protocol;
 
 use pocketmine\network\mcpe\protocol\serializer\PacketSerializer;
-use pocketmine\network\mcpe\protocol\types\PlayerInputTick;
 
 class MobEffectPacket extends DataPacket implements ClientboundPacket{
 	public const NETWORK_ID = ProtocolInfo::MOB_EFFECT_PACKET;
@@ -30,7 +29,7 @@ class MobEffectPacket extends DataPacket implements ClientboundPacket{
 	public int $amplifier = 0;
 	public bool $particles = true;
 	public int $duration = 0;
-	public PlayerInputTick $tick;
+	public int $tick;
 
 	/**
 	 * @generate-create-func
@@ -42,7 +41,7 @@ class MobEffectPacket extends DataPacket implements ClientboundPacket{
 		int $amplifier,
 		bool $particles,
 		int $duration,
-		PlayerInputTick $tick,
+		int $tick,
 	) : self{
 		$result = new self;
 		$result->actorRuntimeId = $actorRuntimeId;
@@ -55,11 +54,11 @@ class MobEffectPacket extends DataPacket implements ClientboundPacket{
 		return $result;
 	}
 
-	public static function add(int $actorRuntimeId, bool $replace, int $effectId, int $amplifier, bool $particles, int $duration, PlayerInputTick $tick) : self{
+	public static function add(int $actorRuntimeId, bool $replace, int $effectId, int $amplifier, bool $particles, int $duration, int $tick) : self{
 		return self::create($actorRuntimeId, $replace ? self::EVENT_MODIFY : self::EVENT_ADD, $effectId, $amplifier, $particles, $duration, $tick);
 	}
 
-	public static function remove(int $actorRuntimeId, int $effectId, PlayerInputTick $tick) : self{
+	public static function remove(int $actorRuntimeId, int $effectId, int $tick) : self{
 		return self::create($actorRuntimeId, self::EVENT_REMOVE, $effectId, 0, false, 0, $tick);
 	}
 
@@ -70,7 +69,7 @@ class MobEffectPacket extends DataPacket implements ClientboundPacket{
 		$this->amplifier = $in->getVarInt();
 		$this->particles = $in->getBool();
 		$this->duration = $in->getVarInt();
-		$this->tick = PlayerInputTick::read($in);
+		$this->tick = $in->readPlayerInputTick();
 	}
 
 	protected function encodePayload(PacketSerializer $out) : void{
@@ -80,7 +79,7 @@ class MobEffectPacket extends DataPacket implements ClientboundPacket{
 		$out->putVarInt($this->amplifier);
 		$out->putBool($this->particles);
 		$out->putVarInt($this->duration);
-		$this->tick->write($out);
+		$out->writePlayerInputTick($this->tick);
 	}
 
 	public function handle(PacketHandlerInterface $handler) : bool{

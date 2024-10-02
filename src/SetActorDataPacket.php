@@ -17,7 +17,6 @@ namespace pocketmine\network\mcpe\protocol;
 use pocketmine\network\mcpe\protocol\serializer\PacketSerializer;
 use pocketmine\network\mcpe\protocol\types\entity\MetadataProperty;
 use pocketmine\network\mcpe\protocol\types\entity\PropertySyncData;
-use pocketmine\network\mcpe\protocol\types\PlayerInputTick;
 
 class SetActorDataPacket extends DataPacket implements ClientboundPacket, ServerboundPacket{ //TODO: check why this is serverbound
 	public const NETWORK_ID = ProtocolInfo::SET_ACTOR_DATA_PACKET;
@@ -29,14 +28,14 @@ class SetActorDataPacket extends DataPacket implements ClientboundPacket, Server
 	 */
 	public array $metadata;
 	public PropertySyncData $syncedProperties;
-	public PlayerInputTick $tick;
+	public int $tick = 0;
 
 	/**
 	 * @generate-create-func
 	 * @param MetadataProperty[] $metadata
 	 * @phpstan-param array<int, MetadataProperty> $metadata
 	 */
-	public static function create(int $actorRuntimeId, array $metadata, PropertySyncData $syncedProperties, PlayerInputTick $tick) : self{
+	public static function create(int $actorRuntimeId, array $metadata, PropertySyncData $syncedProperties, int $tick) : self{
 		$result = new self;
 		$result->actorRuntimeId = $actorRuntimeId;
 		$result->metadata = $metadata;
@@ -49,14 +48,14 @@ class SetActorDataPacket extends DataPacket implements ClientboundPacket, Server
 		$this->actorRuntimeId = $in->getActorRuntimeId();
 		$this->metadata = $in->getEntityMetadata();
 		$this->syncedProperties = PropertySyncData::read($in);
-		$this->tick = PlayerInputTick::read($in);
+		$this->tick = $in->readPlayerInputTick();
 	}
 
 	protected function encodePayload(PacketSerializer $out) : void{
 		$out->putActorRuntimeId($this->actorRuntimeId);
 		$out->putEntityMetadata($this->metadata);
 		$this->syncedProperties->write($out);
-		$this->tick->write($out);
+		$out->writePlayerInputTick($this->tick);
 	}
 
 	public function handle(PacketHandlerInterface $handler) : bool{

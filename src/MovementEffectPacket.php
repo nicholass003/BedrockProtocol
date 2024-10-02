@@ -16,7 +16,6 @@ namespace pocketmine\network\mcpe\protocol;
 
 use pocketmine\network\mcpe\protocol\serializer\PacketSerializer;
 use pocketmine\network\mcpe\protocol\types\MovementEffectType;
-use pocketmine\network\mcpe\protocol\types\PlayerInputTick;
 
 class MovementEffectPacket extends DataPacket implements ClientboundPacket{
 	public const NETWORK_ID = ProtocolInfo::MOVEMENT_EFFECT_PACKET;
@@ -24,9 +23,9 @@ class MovementEffectPacket extends DataPacket implements ClientboundPacket{
 	private int $actorRuntimeId;
 	private MovementEffectType $effectType;
 	private int $effectDuration;
-	private PlayerInputTick $tick;
+	private int $tick;
 
-	public static function create(int $actorRuntimeId, MovementEffectType $effectType, int $effectDuration, PlayerInputTick $tick) : self{
+	public static function create(int $actorRuntimeId, MovementEffectType $effectType, int $effectDuration, int $tick) : self{
 		$result = new self;
 		$result->actorRuntimeId = $actorRuntimeId;
 		$result->effectType = $effectType;
@@ -47,7 +46,7 @@ class MovementEffectPacket extends DataPacket implements ClientboundPacket{
 		return $this->effectDuration;
 	}
 
-	public function getTick() : PlayerInputTick{
+	public function getTick() : int{
 		return $this->tick;
 	}
 
@@ -55,14 +54,14 @@ class MovementEffectPacket extends DataPacket implements ClientboundPacket{
 		$this->actorRuntimeId = $in->getActorRuntimeId();
 		$this->effectType = MovementEffectType::fromPacket($in->getByte());
 		$this->effectDuration = $in->getByte();
-		$this->tick = PlayerInputTick::read($in);
+		$this->tick = $in->readPlayerInputTick();
 	}
 
 	protected function encodePayload(PacketSerializer $out) : void{
 		$out->putActorRuntimeId($this->actorRuntimeId);
 		$out->putByte($this->effectType->value);
 		$out->putByte($this->effectDuration);
-		$this->tick->write($out);
+		$out->writePlayerInputTick($this->tick);
 	}
 
 	public function handle(PacketHandlerInterface $handler) : bool{

@@ -26,7 +26,6 @@ use pocketmine\network\mcpe\protocol\types\PlayerAuthInputFlags;
 use pocketmine\network\mcpe\protocol\types\PlayerBlockAction;
 use pocketmine\network\mcpe\protocol\types\PlayerBlockActionStopBreak;
 use pocketmine\network\mcpe\protocol\types\PlayerBlockActionWithBlockInfo;
-use pocketmine\network\mcpe\protocol\types\PlayerInputTick;
 use pocketmine\network\mcpe\protocol\types\PlayMode;
 use function assert;
 use function count;
@@ -45,7 +44,7 @@ class PlayerAuthInputPacket extends DataPacket implements ServerboundPacket{
 	private int $playMode;
 	private int $interactionMode;
 	private ?Vector3 $vrGazeDirection = null;
-	private PlayerInputTick $tick;
+	private int $tick;
 	private Vector3 $delta;
 	private ?ItemInteractionData $itemInteractionData = null;
 	private ?ItemStackRequest $itemStackRequest = null;
@@ -72,7 +71,7 @@ class PlayerAuthInputPacket extends DataPacket implements ServerboundPacket{
 		int $playMode,
 		int $interactionMode,
 		?Vector3 $vrGazeDirection,
-		PlayerInputTick $tick,
+		int $tick,
 		Vector3 $delta,
 		?ItemInteractionData $itemInteractionData,
 		?ItemStackRequest $itemStackRequest,
@@ -126,7 +125,7 @@ class PlayerAuthInputPacket extends DataPacket implements ServerboundPacket{
 		int $playMode,
 		int $interactionMode,
 		?Vector3 $vrGazeDirection,
-		PlayerInputTick $tick,
+		int $tick,
 		Vector3 $delta,
 		?ItemInteractionData $itemInteractionData,
 		?ItemStackRequest $itemStackRequest,
@@ -235,7 +234,7 @@ class PlayerAuthInputPacket extends DataPacket implements ServerboundPacket{
 		return $this->vrGazeDirection;
 	}
 
-	public function getTick() : PlayerInputTick{
+	public function getTick() : int{
 		return $this->tick;
 	}
 
@@ -286,7 +285,7 @@ class PlayerAuthInputPacket extends DataPacket implements ServerboundPacket{
 		if($this->playMode === PlayMode::VR){
 			$this->vrGazeDirection = $in->getVector3();
 		}
-		$this->tick = PlayerInputTick::read($in);
+		$this->tick = $in->readPlayerInputTick();
 		$this->delta = $in->getVector3();
 		if($this->hasFlag(PlayerAuthInputFlags::PERFORM_ITEM_INTERACTION)){
 			$this->itemInteractionData = ItemInteractionData::read($in);
@@ -326,7 +325,7 @@ class PlayerAuthInputPacket extends DataPacket implements ServerboundPacket{
 		$out->putUnsignedVarInt($this->playMode);
 		$out->putUnsignedVarInt($this->interactionMode);
 		$out->putVector3($this->vrGazeDirection);
-		$this->tick->write($out);
+		$out->writePlayerInputTick($this->tick);
 		$out->putVector3($this->delta);
 		if($this->itemInteractionData !== null){
 			$this->itemInteractionData->write($out);

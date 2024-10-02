@@ -789,6 +789,14 @@ class PacketSerializer extends BinaryStream{
 		$this->putVarInt($id);
 	}
 
+	public function readPlayerInputTick() : int{
+		return $this->getUnsignedVarLong();
+	}
+
+	public function writePlayerInputTick(int $tick) : void{
+		$this->putUnsignedVarLong($tick);
+	}
+
 	/**
 	 * @phpstan-template T
 	 * @phpstan-param \Closure() : T $reader
