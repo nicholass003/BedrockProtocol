@@ -26,20 +26,18 @@ class ResourcePacksInfoPacket extends DataPacket implements ClientboundPacket{
 	public bool $mustAccept = false; //if true, forces client to choose between accepting packs or being disconnected
 	public bool $hasAddons = false;
 	public bool $hasScripts = false; //if true, causes disconnect for any platform that doesn't support scripts yet
-	public string $cdnUrl;
 
 	/**
 	 * @generate-create-func
 	 * @param ResourcePackInfoEntry[] $resourcePackEntries
 	 * @phpstan-param array<string, string> $cdnUrls
 	 */
-	public static function create(array $resourcePackEntries, bool $mustAccept, bool $hasAddons, bool $hasScripts, string $cdnUrl) : self{
+	public static function create(array $resourcePackEntries, bool $mustAccept, bool $hasAddons, bool $hasScripts) : self{
 		$result = new self;
 		$result->resourcePackEntries = $resourcePackEntries;
 		$result->mustAccept = $mustAccept;
 		$result->hasAddons = $hasAddons;
 		$result->hasScripts = $hasScripts;
-		$result->cdnUrl = $cdnUrl;
 		return $result;
 	}
 
@@ -52,8 +50,6 @@ class ResourcePacksInfoPacket extends DataPacket implements ClientboundPacket{
 		while($resourcePackCount-- > 0){
 			$this->resourcePackEntries[] = ResourcePackInfoEntry::read($in);
 		}
-
-		$this->cdnUrl = $in->getString();
 	}
 
 	protected function encodePayload(PacketSerializer $out) : void{
@@ -64,7 +60,6 @@ class ResourcePacksInfoPacket extends DataPacket implements ClientboundPacket{
 		foreach($this->resourcePackEntries as $entry){
 			$entry->write($out);
 		}
-		$out->putString($this->cdnUrl);
 	}
 
 	public function handle(PacketHandlerInterface $handler) : bool{
