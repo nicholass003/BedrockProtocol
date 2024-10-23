@@ -30,7 +30,6 @@ class ResourcePacksInfoPacket extends DataPacket implements ClientboundPacket{
 	/**
 	 * @generate-create-func
 	 * @param ResourcePackInfoEntry[] $resourcePackEntries
-	 * @phpstan-param array<string, string> $cdnUrls
 	 */
 	public static function create(array $resourcePackEntries, bool $mustAccept, bool $hasAddons, bool $hasScripts) : self{
 		$result = new self;

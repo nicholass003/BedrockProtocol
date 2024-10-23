@@ -20,24 +20,25 @@ use pocketmine\network\mcpe\protocol\types\ServerAuthMovementMode;
 class SetMovementAuthorityPacket extends DataPacket implements ClientboundPacket{
 	public const NETWORK_ID = ProtocolInfo::SET_MOVEMENT_AUTHORITY_PACKET;
 
-	private ServerAuthMovementMode $serverAuthMovementMode;
+	private ServerAuthMovementMode $mode;
 
-	public static function create(ServerAuthMovementMode $serverAuthMovementMode) : self{
+	/**
+	 * @generate-create-func
+	 */
+	public static function create(ServerAuthMovementMode $mode) : self{
 		$result = new self;
-		$result->serverAuthMovementMode = $serverAuthMovementMode;
+		$result->mode = $mode;
 		return $result;
 	}
 
-	public function getServerAuthMovementMode() : ServerAuthMovementMode{
-		return $this->serverAuthMovementMode;
-	}
+	public function getMode() : ServerAuthMovementMode{ return $this->mode; }
 
 	protected function decodePayload(PacketSerializer $in) : void{
-		$this->serverAuthMovementMode = ServerAuthMovementMode::fromPacket($in->getByte());
+		$this->mode = ServerAuthMovementMode::fromPacket($in->getByte());
 	}
 
 	protected function encodePayload(PacketSerializer $out) : void{
-		$out->putByte($this->serverAuthMovementMode->value);
+		$out->putByte($this->mode->value);
 	}
 
 	public function handle(PacketHandlerInterface $handler) : bool{

@@ -62,9 +62,7 @@ class ResourcePackInfoEntry{
 
 	public function isRtxCapable() : bool{ return $this->isRtxCapable; }
 
-	public function getUrl() : string{
-		return $this->cdnUrl;
-	}
+	public function getCdnUrl() : string{ return $this->cdnUrl; }
 
 	public function write(PacketSerializer $out) : void{
 		$out->putString($this->packId);

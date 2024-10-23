@@ -253,7 +253,6 @@ final class ProtocolInfo{
 	public const SERVERBOUND_DIAGNOSTICS_PACKET = 0x13b;
 	public const CAMERA_AIM_ASSIST_PACKET = 0x13c;
 	public const CONTAINER_REGISTRY_CLEANUP_PACKET = 0x13d;
-
 	public const MOVEMENT_EFFECT_PACKET = 0x13e;
 	public const SET_MOVEMENT_AUTHORITY_PACKET = 0x13f;
 }

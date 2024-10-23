@@ -29,7 +29,7 @@ class MobEffectPacket extends DataPacket implements ClientboundPacket{
 	public int $amplifier = 0;
 	public bool $particles = true;
 	public int $duration = 0;
-	public int $tick;
+	public int $tick = 0;
 
 	/**
 	 * @generate-create-func
@@ -69,7 +69,7 @@ class MobEffectPacket extends DataPacket implements ClientboundPacket{
 		$this->amplifier = $in->getVarInt();
 		$this->particles = $in->getBool();
 		$this->duration = $in->getVarInt();
-		$this->tick = $in->readPlayerInputTick();
+		$this->tick = $in->getUnsignedVarLong();
 	}
 
 	protected function encodePayload(PacketSerializer $out) : void{
@@ -79,7 +79,7 @@ class MobEffectPacket extends DataPacket implements ClientboundPacket{
 		$out->putVarInt($this->amplifier);
 		$out->putBool($this->particles);
 		$out->putVarInt($this->duration);
-		$out->writePlayerInputTick($this->tick);
+		$out->putUnsignedVarLong($this->tick);
 	}
 
 	public function handle(PacketHandlerInterface $handler) : bool{

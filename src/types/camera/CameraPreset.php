@@ -67,6 +67,12 @@ final class CameraPreset{
 
 	public function getContinueTargeting() : ?bool{ return $this->continueTargeting; }
 
+	public function getHorizontalRotationLimit() : ?Vector2{ return $this->horizontalRotationLimit; }
+
+	public function getVerticalRotationLimit() : ?Vector2{ return $this->verticalRotationLimit; }
+
+	public function getContinueTargeting() : ?bool{ return $this->continueTargeting; }
+
 	public function getViewOffset() : ?Vector2{ return $this->viewOffset; }
 
 	public function getEntityOffset() : ?Vector3{ return $this->entityOffset; }

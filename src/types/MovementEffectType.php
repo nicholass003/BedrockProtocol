@@ -19,5 +19,4 @@ enum MovementEffectType : int{
 
 	case INVALID = -1;
 	case GLIDE_BOOST = 0;
-	case COUNT = 1;
 }
